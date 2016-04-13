@@ -1,4 +1,5 @@
-		GraspIt! HelloWorld Plugin
+## GraspIt! HelloWorld Plugin
+---
 
 In the plugin directory
 ```
