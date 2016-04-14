@@ -17,10 +17,6 @@ OBJECTS_DIR = build
    error("GRASPIT environment variable not set")
 }
 
-!exists($(GRASPIT_PLUGIN_DIR)) {
-   error("GRASPIT_PLUGIN_DIR environment variable not set")
-}
-
 INCLUDEPATH += $(GRASPIT) $(GRASPIT)/qjson4 $(GRASPIT)/cmdline
 
 DEPENDPATH += $(GRASPIT)/src 
