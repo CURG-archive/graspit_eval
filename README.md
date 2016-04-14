@@ -1,7 +1,7 @@
 ## GraspIt! HelloWorld Plugin
 ---
 
-In the plugin directory
+In the plugin directory or run ``source set_env.sh``
 ```
 export GRASPIT_PLUGIN_DIR=/path_to_plugin_dir/lib 
 ```
