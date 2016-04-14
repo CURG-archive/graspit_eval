@@ -3,9 +3,14 @@
 
 In the plugin directory or run ``source set_env.sh``
 ```
-export GRASPIT_PLUGIN_DIR=/path_to_plugin_dir/lib 
+git submodule init
+git submodule update # this will pull down the mongo driver
 ```
 
+Some dependency info:
+```
+sudo apt-get install dh-autoreconf
+```
 in Graspit, run 
 
 ```

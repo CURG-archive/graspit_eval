@@ -1,3 +1,6 @@
 [submodule "mongo-cxx-driver"]
 	path = mongo-cxx-driver
 	url = https://github.com/mongodb/mongo-cxx-driver
+[submodule "libbson"]
+	path = libbson
+	url = https://github.com/mongodb/libbson
