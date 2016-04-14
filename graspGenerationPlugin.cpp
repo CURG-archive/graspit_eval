@@ -20,6 +20,7 @@
 
 #include <cmdline/cmdline.h>
 #include "include/dbModelLoader.h"
+#include <mongocxx/client.hpp>
 
 GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
