@@ -12,7 +12,11 @@ in Graspit, run
 ./bin/graspit -p libthenameoftheplugin
 ```
 
+or 
 
+```
+~/graspit/bin/graspit -p libgraspGenerationPlugin -c mug.iv
+```
 Introduction
 ------------
 This plugin serves as an introduction to writing plugins for the GraspIt! grasping simulator.
