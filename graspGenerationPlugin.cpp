@@ -20,7 +20,22 @@
 
 #include <cmdline/cmdline.h>
 #include "include/dbModelLoader.h"
+
+// mongo specific headers
 #include <mongocxx/client.hpp>
+#include <mongocxx/instance.hpp>
+#include <mongocxx/uri.hpp>
+#include "mongocxx/collection.hpp"
+#include <mongocxx/result/insert_one.hpp>
+
+#include <bsoncxx/builder/basic/array.hpp>
+#include <bsoncxx/builder/basic/document.hpp>
+#include <bsoncxx/builder/basic/kvp.hpp>
+#include <bsoncxx/types.hpp>
+using namespace bsoncxx;
+using bsoncxx::builder::basic::kvp;
+
+
 
 GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
@@ -38,6 +53,15 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
+    std::cout << "Executing here" << std::endl;
+    mongocxx::instance inst{};
+//    mongocxx::client conn{mongocxx::uri{}};
+
+    /*
+    mongocxx::client conn{mongocxx::uri{"mongodb://tim:ilovetim@ds013221.mlab.com:13221/robolab"}};*/
+//    auto coll = conn["test"]["sampleCollection"];
+//    std::cout << "passed here" << std::endl;
+
     std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
     cmdline::parser *parser = new cmdline::parser();
 
@@ -141,6 +165,21 @@ void GraspGenerationPlugin::stepPlanner()
 void GraspGenerationPlugin::uploadResults()
 {
 
+
+    // mongo test code
+//    mongocxx::client conn{mongocxx::uri{}};
+//    auto coll = conn["test"]["sampleCollection:"];
+//    // basic::document builds a BSON document.
+//    auto doc = builder::basic::document{};
+//    // We append key-value pairs to a document using the kvp helper.
+//    doc.append(
+//        kvp("foo", "bar"));  // string literal value will be converted to b_utf8 automatically
+//    doc.append(kvp("baz", types::b_bool{false}));
+//    doc.append(kvp("garply", types::b_double{3.14159}));
+//    doc.view();
+//    coll.insert_one(doc.view());
+//    //mongo test code ends here
+
     SearchEnergy *mEnergyCalculator = new SearchEnergy();
     mEnergyCalculator->setType(ENERGY_CONTACT_QUALITY);
     mEnergyCalculator->setContactType(CONTACT_PRESET);
@@ -167,6 +206,9 @@ void GraspGenerationPlugin::uploadResults()
         mHand->getDOFVals(dofVals);
 
         transf hand_pose = mHand->getPalm()->getTran();
+
+
+
 
         //TODO
         //here we need to save all this to the database:
