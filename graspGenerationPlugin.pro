@@ -8,7 +8,7 @@ TEMPLATE = lib
 
 LANGUAGE	= C++
 CONFIG += qt dylib
-QMAKE_CXXFLAGS += -std=c++11
+QMAKE_CXXFLAGS += -g
 QT += qt3support
 DESTDIR = lib
 MOC_DIR = build
@@ -38,4 +38,4 @@ SOURCES += \
 
 # Mongo Driver shared lib
 #LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongocxx -lbsoncxx
-LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongoclient
+LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongoclient -lboost_system

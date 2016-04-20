@@ -58,6 +58,7 @@ GraspGenerationPlugin::GraspGenerationPlugin() :
     evaluatingGrasps(false),
     num_steps(70000)
 {
+
 }
 
 GraspGenerationPlugin::~GraspGenerationPlugin()
@@ -67,8 +68,10 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
+    mongo::client::Options opt;
+    mongo::client::initialize(opt);
     std::cout << "Executing here" << std::endl;
-    mongo::client::initialize();
+
 //    mongocxx::instance inst{};
 //    mongocxx::client conn{mongocxx::uri{}};
 
