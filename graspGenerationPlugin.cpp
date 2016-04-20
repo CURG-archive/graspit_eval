@@ -51,6 +51,12 @@
 //#include "mongo-cxx-driver/src/mongo/client/dbclient.h"
 //#include "monetary.h"
 
+using mongo::BSONArray;
+using mongo::BSONArrayBuilder;
+using mongo::BSONObj;
+using mongo::BSONObjBuilder;
+using mongo::BSONElement;
+
 GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
     plannerStarted(false),
@@ -66,11 +72,32 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 }
 
 
+void run() {
+
+}
+
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
-    mongo::client::Options opt;
-    mongo::client::initialize(opt);
-    std::cout << "Executing here" << std::endl;
+//    mongo::client::Options opt;
+//    mongo::client::initialize(opt);
+    mongo::DBClientConnection c;
+    mongo::client::initialize();
+       try {
+
+
+           c.connect("localhost");
+           std::cout << "connected ok" << std::endl;
+       } catch( const mongo::DBException &e ) {
+           std::cout << "caught " << e.what() << std::endl;
+       }
+
+    BSONObjBuilder b;
+    b.append("name", "Joe");
+    b.append("age", 33);
+    BSONObj p = b.obj();
+    c.insert("test.persons", p);
+
+    std::cout << "Still alive! Executing here" << std::endl;
 
 //    mongocxx::instance inst{};
 //    mongocxx::client conn{mongocxx::uri{}};
