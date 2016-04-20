@@ -7,6 +7,13 @@ git submodule init
 git submodule update # this will pull down the mongo driver
 ```
 
+Build Mongo driver:
+
+```
+cd mongo-cxx-driver
+scons --dbg=on --sharedclient=SHAREDCLIENT -j4
+```
+
 Some dependency info:
 ```
 sudo apt-get install dh-autoreconf
