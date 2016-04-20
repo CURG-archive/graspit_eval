@@ -7,6 +7,7 @@
 
 //GraspIt! includes
 #include <include/plugin.h>
+#include "mongo/client/dbclient.h" // for the driver
 
 class EGPlanner;
 class GraspPlanningState;
@@ -56,6 +57,7 @@ private:
   bool render_it;
 
   int num_steps;
+  mongo::DBClientConnection *c;
 
 };
 

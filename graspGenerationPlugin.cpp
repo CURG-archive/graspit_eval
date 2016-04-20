@@ -21,35 +21,10 @@
 #include <cmdline/cmdline.h>
 #include "include/dbModelLoader.h"
 
-//// mongo specific headers
-//#include <mongocxx/client.hpp>
-//#include <mongocxx/instance.hpp>
-//#include <mongocxx/uri.hpp>
-//#include "mongocxx/collection.hpp"
-//#include <mongocxx/result/insert_one.hpp>
-
-//#include <bsoncxx/builder/basic/array.hpp>
-//#include <bsoncxx/builder/basic/document.hpp>
-//#include <bsoncxx/builder/basic/kvp.hpp>
-//#include <bsoncxx/types.hpp>
-
-//// streaming protocol specific
-//#include <bsoncxx/builder/stream/document.hpp>
-//#include <bsoncxx/json.hpp>
 #include <cstdlib>
 #include <iostream>
 
-#include <iostream>
-
-//#include <bsoncxx/builder/stream/document.hpp>
-//#include <bsoncxx/json.hpp>
-
-//#include <mongocxx/client.hpp>
-//#include <mongocxx/instance.hpp>
-
 #include "mongo/client/dbclient.h" // for the driver
-//#include "mongo-cxx-driver/src/mongo/client/dbclient.h"
-//#include "monetary.h"
 
 using mongo::BSONArray;
 using mongo::BSONArrayBuilder;
@@ -80,54 +55,24 @@ int GraspGenerationPlugin::init(int argc, char **argv)
 {
 //    mongo::client::Options opt;
 //    mongo::client::initialize(opt);
-    mongo::DBClientConnection c;
+    c = new mongo::DBClientConnection();
     mongo::client::initialize();
-       try {
+    try {
 
 
-           c.connect("localhost");
-           std::cout << "connected ok" << std::endl;
-       } catch( const mongo::DBException &e ) {
-           std::cout << "caught " << e.what() << std::endl;
-       }
+        c->connect("localhost");
+        std::cout << "connected ok to mongodb" << std::endl;
+    } catch( const mongo::DBException &e ) {
+        std::cout << "caught " << e.what() << std::endl;
+    }
 
     BSONObjBuilder b;
     b.append("name", "Joe");
     b.append("age", 33);
     BSONObj p = b.obj();
-    c.insert("test.persons", p);
+    c->insert("test.persons", p);
 
     std::cout << "Still alive! Executing here" << std::endl;
-
-//    mongocxx::instance inst{};
-//    mongocxx::client conn{mongocxx::uri{}};
-
-    /*
-    mongocxx::client conn{mongocxx::uri{"mongodb://tim:ilovetim@ds013221.mlab.com:13221/robolab"}};*/
-//    auto coll = conn["test"]["sampleCollection"];
-//    std::cout << "passed here" << std::endl;
-
-
-
-
-
-//    mongocxx::instance inst{};
-//    mongocxx::client conn{mongocxx::uri{}};
-
-//    bsoncxx::builder::stream::document document{};
-
-//    auto collection = conn["testdb"]["testcollection"];
-//    document << "hello" << "world";
-
-//    collection.insert_one(document.view());
-//    auto cursor = collection.find({});
-
-//    for (auto&& doc : cursor) {
-//        std::cout << bsoncxx::to_json(doc) << std::endl;
-//    }
-
-
-
 
 
     std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
@@ -280,6 +225,8 @@ void GraspGenerationPlugin::uploadResults()
 
         //TODO
         //here we need to save all this to the database:
+
+
         std::cout << "Object: " << mesh_filepath.toStdString().c_str() << std::endl;
         std::cout << "Hand: " << mHand->getFilename().toStdString().c_str() << std::endl;
         std::cout << "Energy TYPE: " << "ENERGY_CONTACT_QUALITY" << std::endl;
