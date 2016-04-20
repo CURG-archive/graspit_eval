@@ -66,11 +66,7 @@ int GraspGenerationPlugin::init(int argc, char **argv)
         std::cout << "caught " << e.what() << std::endl;
     }
 
-    BSONObjBuilder b;
-    b.append("name", "Joe");
-    b.append("age", 33);
-    BSONObj p = b.obj();
-    c->insert("test.persons", p);
+
 
     std::cout << "Still alive! Executing here" << std::endl;
 
@@ -220,18 +216,24 @@ void GraspGenerationPlugin::uploadResults()
 
         transf hand_pose = mHand->getPalm()->getTran();
 
+        //mongo objects
+        BSONObjBuilder grasp;
+        BSONObjBuilder pose;
+        BSONObjBuilder energy;
+        BSONArrayBuilder translation;
+        BSONArrayBuilder rotation;
+        BSONArrayBuilder dof;
 
 
 
-        //TODO
         //here we need to save all this to the database:
-
-
         std::cout << "Object: " << mesh_filepath.toStdString().c_str() << std::endl;
-        std::cout << "Hand: " << mHand->getFilename().toStdString().c_str() << std::endl;
+        std::cout << "Hand: " << mHand->getDBName().toStdString().c_str() << std::endl;
+
         std::cout << "Energy TYPE: " << "ENERGY_CONTACT_QUALITY" << std::endl;
         std::cout << "Energy Value: " << new_planned_energy << std::endl;
-        std::cout << "Pose: ";
+
+        std::cout << "Pose: " << std::endl;
         std::cout << hand_pose.translation().x() << "; ";
         std::cout << hand_pose.translation().y() << "; ";
         std::cout << hand_pose.translation().z() << "; ";
@@ -239,12 +241,40 @@ void GraspGenerationPlugin::uploadResults()
         std::cout << hand_pose.rotation().x << "; ";
         std::cout << hand_pose.rotation().y << "; ";
         std::cout << hand_pose.rotation().z << std::endl;
+
+
+
         std::cout << "Dof: ";
+
         for(int dof_idx = 0; dof_idx < mHand->getNumDOF(); dof_idx ++)
         {
+            dof.append(dofVals[dof_idx]);
             std::cout << dofVals[dof_idx] << "; ";
         }
-        std::cout << std::endl;
+
+
+
+
+        // object and hand
+        grasp.append("object", mesh_filepath.toStdString());
+        grasp.append("hand", mHand->getDBName().toStdString());
+
+        // Energy
+        energy.append("type", "ENERGY_CONTACT_QUALITY");
+        energy.append("value", new_planned_energy);
+
+        // Pose
+        translation.append(hand_pose.translation().x()).append(hand_pose.translation().y()).append(hand_pose.translation().z());
+        rotation.append(hand_pose.rotation().w).append(hand_pose.rotation().x).append(hand_pose.rotation().y).append(hand_pose.rotation().z);
+        pose.append("translation", translation.arr());
+        pose.append("rotation", rotation.arr());
+
+
+        grasp.append("energy", energy.obj());
+        grasp.appendArray("dof", dof.arr());
+        grasp.append("pose", pose.obj());
+        BSONObj p = grasp.obj();
+        c->insert("test.grasps_dev", p);
 
     }
 
