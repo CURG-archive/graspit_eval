@@ -21,21 +21,35 @@
 #include <cmdline/cmdline.h>
 #include "include/dbModelLoader.h"
 
-// mongo specific headers
-#include <mongocxx/client.hpp>
-#include <mongocxx/instance.hpp>
-#include <mongocxx/uri.hpp>
-#include "mongocxx/collection.hpp"
-#include <mongocxx/result/insert_one.hpp>
+//// mongo specific headers
+//#include <mongocxx/client.hpp>
+//#include <mongocxx/instance.hpp>
+//#include <mongocxx/uri.hpp>
+//#include "mongocxx/collection.hpp"
+//#include <mongocxx/result/insert_one.hpp>
 
-#include <bsoncxx/builder/basic/array.hpp>
-#include <bsoncxx/builder/basic/document.hpp>
-#include <bsoncxx/builder/basic/kvp.hpp>
-#include <bsoncxx/types.hpp>
-using namespace bsoncxx;
-using bsoncxx::builder::basic::kvp;
+//#include <bsoncxx/builder/basic/array.hpp>
+//#include <bsoncxx/builder/basic/document.hpp>
+//#include <bsoncxx/builder/basic/kvp.hpp>
+//#include <bsoncxx/types.hpp>
 
+//// streaming protocol specific
+//#include <bsoncxx/builder/stream/document.hpp>
+//#include <bsoncxx/json.hpp>
+#include <cstdlib>
+#include <iostream>
 
+#include <iostream>
+
+//#include <bsoncxx/builder/stream/document.hpp>
+//#include <bsoncxx/json.hpp>
+
+//#include <mongocxx/client.hpp>
+//#include <mongocxx/instance.hpp>
+
+#include "mongo/client/dbclient.h" // for the driver
+//#include "mongo-cxx-driver/src/mongo/client/dbclient.h"
+//#include "monetary.h"
 
 GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
@@ -54,13 +68,37 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
     std::cout << "Executing here" << std::endl;
-    mongocxx::instance inst{};
+    mongo::client::initialize();
+//    mongocxx::instance inst{};
 //    mongocxx::client conn{mongocxx::uri{}};
 
     /*
     mongocxx::client conn{mongocxx::uri{"mongodb://tim:ilovetim@ds013221.mlab.com:13221/robolab"}};*/
 //    auto coll = conn["test"]["sampleCollection"];
 //    std::cout << "passed here" << std::endl;
+
+
+
+
+
+//    mongocxx::instance inst{};
+//    mongocxx::client conn{mongocxx::uri{}};
+
+//    bsoncxx::builder::stream::document document{};
+
+//    auto collection = conn["testdb"]["testcollection"];
+//    document << "hello" << "world";
+
+//    collection.insert_one(document.view());
+//    auto cursor = collection.find({});
+
+//    for (auto&& doc : cursor) {
+//        std::cout << bsoncxx::to_json(doc) << std::endl;
+//    }
+
+
+
+
 
     std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
     cmdline::parser *parser = new cmdline::parser();
