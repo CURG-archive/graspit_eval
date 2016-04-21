@@ -9,10 +9,16 @@
 #include <include/plugin.h>
 #include "mongo/client/dbclient.h" // for the driver
 
+
+//Qt headers
+#include <QJsonObject.h>
+
 class EGPlanner;
 class GraspPlanningState;
 class GraspableBody;
 class Hand;
+
+
 
 //! Main class, combining a ROS node with a GraspIt! interface
 /*! Note that this class inherits from GraspIt's Plugin class and implements the necessary functions to serve
@@ -41,13 +47,15 @@ protected:
   void uploadResults();
   void stepPlanner();
 
+  mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
+
 private:
 
   EGPlanner *mPlanner;
   GraspPlanningState *mHandObjectState;
   GraspableBody *mObject;
   Hand *mHand;
-
+  QJsonObject modelJson;
   bool plannerStarted;
   bool plannerFinished;
   bool evaluatingGrasps;

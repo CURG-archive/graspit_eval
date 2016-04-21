@@ -21,9 +21,6 @@ OBJECTS_DIR = build
 INCLUDEPATH += $(GRASPIT) $(GRASPIT)/qjson4 $(GRASPIT)/cmdline
 
 # Mongo Driver headers
-#INCLUDEPATH += /home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/include/mongocxx/v_noabi
-#INCLUDEPATH += /home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/include/bsoncxx/v_noabi
-#INCLUDEPATH += /home/timchunght/graspit_data_gen/mongo-cxx-driver/build/linux2/normal/mongo
 INCLUDEPATH += /home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/include
 
 
@@ -37,5 +34,4 @@ SOURCES += \
     graspGenerationPlugin.cpp
 
 # Mongo Driver shared lib
-#LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongocxx -lbsoncxx
 LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongoclient -lboost_system

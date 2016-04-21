@@ -1,5 +1,6 @@
 #include "graspGenerationPlugin.h"
 
+#include "QJsonObject.h"
 #include <boost/foreach.hpp>
 #include <cmath>
 #include <fstream>
@@ -12,6 +13,8 @@
 
 #include <include/EGPlanner/egPlanner.h>
 #include <include/EGPlanner/simAnnPlanner.h>
+#include <include/EGPlanner/onLinePlanner.h>
+#include <include/EGPlanner/guidedPlanner.h>
 #include <include/EGPlanner/searchState.h>
 #include <include/EGPlanner/searchEnergy.h>
 
@@ -25,6 +28,8 @@
 #include <iostream>
 
 #include "mongo/client/dbclient.h" // for the driver
+
+
 
 using mongo::BSONArray;
 using mongo::BSONArrayBuilder;
@@ -47,19 +52,15 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 }
 
 
-void run() {
-
-}
-
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
-//    mongo::client::Options opt;
-//    mongo::client::initialize(opt);
+    std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
+
+
+    std::cout << "Connecting to Mongo..." << std::endl ;
     c = new mongo::DBClientConnection();
     mongo::client::initialize();
     try {
-
-
         c->connect("localhost");
         std::cout << "connected ok to mongodb" << std::endl;
     } catch( const mongo::DBException &e ) {
@@ -67,11 +68,7 @@ int GraspGenerationPlugin::init(int argc, char **argv)
     }
 
 
-
-    std::cout << "Still alive! Executing here" << std::endl;
-
-
-    std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
+    std::cout << "Parsing Args..." << std::endl;
     cmdline::parser *parser = new cmdline::parser();
 
     parser->add<std::string>("mesh_filepath", 'c', "mesh_filepath",  false);
@@ -90,10 +87,14 @@ int GraspGenerationPlugin::init(int argc, char **argv)
     }
 
     mesh_filepath = QString::fromStdString(parser->get<std::string>("mesh_filepath"));
+
+    std::cout << "Args are: " << std::endl;
     std::cout << "render: " << render_it << "\n" ;
     std::cout << "mesh_filepath: " << mesh_filepath.toStdString().c_str() << "\n" ;
 
-  return 0;
+    std::cout << "Finished Init..." << std::endl;
+
+    return 0;
 }
 
 //This loop is called over and over again. We do 3 different things
@@ -129,12 +130,15 @@ void GraspGenerationPlugin::startPlanner()
     //here we need to get the hand and object from the cloud. rather than locally
     QString modelUrl = "http://borneo.cs.columbia.edu/modelnet/vision.cs.princeton.edu/projects/2014/ModelNet/data/pyramid/pyramid_000001463/pyramid_000001463.off";
     DbModelLoader loader;
-    loader.loadModelFromUrl(modelUrl);
+//    loader.loadModelFromUrl(modelUrl, QString(""), QString("rubber"));
+
+    modelJson = loader.loadRandomModel();
 
     std::cout << "FINISHED LOADING DEBUG" << std::endl;
 //    graspItGUI->getMainWorld()->importBody("GraspableBody", mesh_filepath);
     //this is fine for now, in the future, we may change this
-    graspItGUI->getMainWorld()->importRobot("/home/timchunght/graspit/models/robots/pr2_gripper_2010/pr2_gripper_2010.xml");
+//    graspItGUI->getMainWorld()->importRobot("/home/timchunght/graspit/models/robots/pr2_gripper_2010/pr2_gripper_2010.xml");
+//    graspItGUI->getMainWorld()->importRobot("/home/timchunght/graspit/models/robots/Barrett/Barrett.xml");
 
     mObject = graspItGUI->getMainWorld()->getGB(0);
     mObject->setMaterial(5);//rubber
@@ -151,6 +155,9 @@ void GraspGenerationPlugin::startPlanner()
 
     mPlanner = new SimAnnPlanner(mHand);
     ((SimAnnPlanner*)mPlanner)->setModelState(mHandObjectState);
+
+//    mPlanner = new GuidedPlanner(mHand);
+//    ((SimAnnPlanner*)mPlanner)->setModelState(mHandObjectState);
 
     mPlanner->setEnergyType(ENERGY_CONTACT_QUALITY);
     mPlanner->setContactType(CONTACT_PRESET);
@@ -174,21 +181,6 @@ void GraspGenerationPlugin::stepPlanner()
 void GraspGenerationPlugin::uploadResults()
 {
 
-
-    // mongo test code
-//    mongocxx::client conn{mongocxx::uri{}};
-//    auto coll = conn["test"]["sampleCollection:"];
-//    // basic::document builds a BSON document.
-//    auto doc = builder::basic::document{};
-//    // We append key-value pairs to a document using the kvp helper.
-//    doc.append(
-//        kvp("foo", "bar"));  // string literal value will be converted to b_utf8 automatically
-//    doc.append(kvp("baz", types::b_bool{false}));
-//    doc.append(kvp("garply", types::b_double{3.14159}));
-//    doc.view();
-//    coll.insert_one(doc.view());
-//    //mongo test code ends here
-
     SearchEnergy *mEnergyCalculator = new SearchEnergy();
     mEnergyCalculator->setType(ENERGY_CONTACT_QUALITY);
     mEnergyCalculator->setContactType(CONTACT_PRESET);
@@ -209,75 +201,63 @@ void GraspGenerationPlugin::uploadResults()
         gps.saveCurrentHandState();
 
         graspItGUI->getIVmgr()->getViewer()->render();
-        usleep(1000000);
+        //usleep(1000000);
 
-        double dofVals [mHand->getNumDOF()];
-        mHand->getDOFVals(dofVals);
-
-        transf hand_pose = mHand->getPalm()->getTran();
-
-        //mongo objects
-        BSONObjBuilder grasp;
-        BSONObjBuilder pose;
-        BSONObjBuilder energy;
-        BSONArrayBuilder translation;
-        BSONArrayBuilder rotation;
-        BSONArrayBuilder dof;
-
-
-
-        //here we need to save all this to the database:
-        std::cout << "Object: " << mesh_filepath.toStdString().c_str() << std::endl;
-        std::cout << "Hand: " << mHand->getDBName().toStdString().c_str() << std::endl;
-
-        std::cout << "Energy TYPE: " << "ENERGY_CONTACT_QUALITY" << std::endl;
-        std::cout << "Energy Value: " << new_planned_energy << std::endl;
-
-        std::cout << "Pose: " << std::endl;
-        std::cout << hand_pose.translation().x() << "; ";
-        std::cout << hand_pose.translation().y() << "; ";
-        std::cout << hand_pose.translation().z() << "; ";
-        std::cout << hand_pose.rotation().w << "; ";
-        std::cout << hand_pose.rotation().x << "; ";
-        std::cout << hand_pose.rotation().y << "; ";
-        std::cout << hand_pose.rotation().z << std::endl;
-
-
-
-        std::cout << "Dof: ";
-
-        for(int dof_idx = 0; dof_idx < mHand->getNumDOF(); dof_idx ++)
-        {
-            dof.append(dofVals[dof_idx]);
-            std::cout << dofVals[dof_idx] << "; ";
-        }
-
-
-
-
-        // object and hand
-        grasp.append("object", mesh_filepath.toStdString());
-        grasp.append("hand", mHand->getDBName().toStdString());
-
-        // Energy
-        energy.append("type", "ENERGY_CONTACT_QUALITY");
-        energy.append("value", new_planned_energy);
-
-        // Pose
-        translation.append(hand_pose.translation().x()).append(hand_pose.translation().y()).append(hand_pose.translation().z());
-        rotation.append(hand_pose.rotation().w).append(hand_pose.rotation().x).append(hand_pose.rotation().y).append(hand_pose.rotation().z);
-        pose.append("translation", translation.arr());
-        pose.append("rotation", rotation.arr());
-
-
-        grasp.append("energy", energy.obj());
-        grasp.appendArray("dof", dof.arr());
-        grasp.append("pose", pose.obj());
-        BSONObj p = grasp.obj();
+        BSONObj p = toMongoGrasp(&gps, QString("ENERGY_CONTACT_QUALITY"));
         c->insert("test.grasps_dev", p);
 
     }
 
     assert(false);
+}
+
+mongo::BSONObj GraspGenerationPlugin::toMongoGrasp(GraspPlanningState *gps, QString energyType)
+{
+    BSONObjBuilder grasp;
+    BSONObjBuilder pose;
+    BSONObjBuilder model;
+    BSONObjBuilder energy;
+    BSONArrayBuilder translation;
+    BSONArrayBuilder rotation;
+    BSONArrayBuilder dof;
+
+    Hand *hand = gps->getHand();
+    GraspableBody *body = gps->getObject();
+
+    double dofVals [hand->getNumDOF()];
+    hand->getDOFVals(dofVals);
+
+    transf hand_pose = mHand->getPalm()->getTran();
+
+    for(int dof_idx = 0; dof_idx < hand->getNumDOF(); dof_idx ++)
+    {
+        dof.append(dofVals[dof_idx]);
+    }
+
+    energy.append("type", "ENERGY_CONTACT_QUALITY");
+    energy.append("value", gps->getEnergy());
+
+    translation.append(hand_pose.translation().x()).append(hand_pose.translation().y()).append(hand_pose.translation().z());
+    rotation.append(hand_pose.rotation().w).append(hand_pose.rotation().x).append(hand_pose.rotation().y).append(hand_pose.rotation().z);
+    pose.append("translation", translation.arr());
+    pose.append("rotation", rotation.arr());
+
+    QString url = modelJson["url"].toString();
+    QString modelName = modelJson["name"].toString();
+    QString material = modelJson["material"].toString();
+    double dimension = modelJson["dimension"].toDouble();
+
+    model.append("name", modelName.toStdString());
+    model.append("url", url.toStdString());
+    model.append("material", material.toStdString());
+    model.append("dimension", dimension);
+
+    grasp.append("model", model.obj());
+    grasp.append("hand", hand->getDBName().toStdString());
+    grasp.append("energy", energy.obj());
+    grasp.appendArray("dof", dof.arr());
+    grasp.append("pose", pose.obj());
+
+    return grasp.obj();
 }
 
