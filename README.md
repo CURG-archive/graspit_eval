@@ -11,8 +11,9 @@ Build Mongo driver:
 
 ```
 cd mongo-cxx-driver
-scons --dbg=on --sharedclient=SHAREDCLIENT -j4
+scons --dbg=on --c++11 --ssl --sharedclient=SHAREDCLIENT -j4 install
 ```
+Make sure to include c++11 in CONFIG and FLAGS in .pro (NEITHER OR NONE AT ALL)
 
 Some dependency info:
 ```
