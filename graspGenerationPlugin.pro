@@ -7,8 +7,8 @@ TEMPLATE = lib
 }
 
 LANGUAGE	= C++
-CONFIG += qt dylib
-QMAKE_CXXFLAGS += -g
+CONFIG += qt dylib c++11
+QMAKE_CXXFLAGS += -g -std=c++11 
 QT += qt3support
 DESTDIR = lib
 MOC_DIR = build
