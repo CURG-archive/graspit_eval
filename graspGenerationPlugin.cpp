@@ -36,6 +36,8 @@ using mongo::BSONArrayBuilder;
 using mongo::BSONObj;
 using mongo::BSONObjBuilder;
 using mongo::BSONElement;
+using namespace mongo;
+
 
 GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
@@ -55,13 +57,45 @@ GraspGenerationPlugin::~GraspGenerationPlugin()
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
     std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
-
-
     std::cout << "Connecting to Mongo..." << std::endl ;
-    c = new mongo::DBClientConnection();
-    mongo::client::initialize();
+
+    mongo::client::GlobalInstance instance;
+    if (!instance.initialized()) {
+        std::cout << "failed to initialize the client driver: " << instance.status() << std::endl;
+        return EXIT_FAILURE;
+    }
     try {
-        c->connect("localhost");
+
+
+        std::string uri = "mongodb://localhost:27017";
+        std::string errmsg;
+
+        ConnectionString cs = ConnectionString::parse(uri, errmsg);
+
+        if (!cs.isValid()) {
+            std::cout << "Error parsing connection string " << uri << ": " << errmsg << std::endl;
+            return EXIT_FAILURE;
+        }
+
+        c = cs.connect(errmsg);
+        if (!c) {
+            std::cout << "couldn't connect : " << errmsg << std::endl;
+            return EXIT_FAILURE;
+        }
+
+
+
+
+
+//        std::string errmsg;
+//        ConnectionString cs = ConnectionString::parse("mongodb://localhost:27017", errmsg);
+////        mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse
+
+////        c.connect(cs.getServers().at(0));
+////        c.auth(cs.getDatabase(), cs.getUser(), cs.getPassword());
+////        c = cs.connect(errmsg);
+////        c = static_cast<mongo::DBClientConnection*>(cs.connect(errmsg));
+//        boost::scoped_ptr<DBClientBase> c(cs.connect(errmsg));
         std::cout << "connected ok to mongodb" << std::endl;
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -207,7 +241,7 @@ void GraspGenerationPlugin::uploadResults()
         c->insert("test.grasps_dev", p);
 
     }
-
+    // TODO: find a better way to die
     assert(false);
 }
 

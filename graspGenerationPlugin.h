@@ -65,7 +65,8 @@ private:
   bool render_it;
 
   int num_steps;
-  mongo::DBClientConnection *c;
+  //mongo::DBClientConnection *c;
+  mongo::DBClientBase *c;
 
 };
 
