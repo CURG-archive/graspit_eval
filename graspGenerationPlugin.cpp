@@ -1,7 +1,6 @@
 #include "graspGenerationPlugin.h"
 
 #include "QJsonObject.h"
-#include <boost/foreach.hpp>
 #include <cmath>
 #include <fstream>
 
@@ -44,20 +43,21 @@ GraspGenerationPlugin::GraspGenerationPlugin() :
     plannerStarted(false),
     plannerFinished(false),
     evaluatingGrasps(false),
-    num_steps(70000)
+    myInteger(10001)
 {
 
 }
 
 GraspGenerationPlugin::~GraspGenerationPlugin()
 {
-}
+}        
 
 
 int GraspGenerationPlugin::init(int argc, char **argv)
 {
     std::cout << "Starting GraspGenerationPlugin: " << std::endl ;
     std::cout << "Connecting to Mongo..." << std::endl ;
+    std::cout << "My Integer" << myInteger << std::endl;
 
     mongo::client::GlobalInstance instance;
     if (!instance.initialized()) {
@@ -67,7 +67,7 @@ int GraspGenerationPlugin::init(int argc, char **argv)
     try {
 
 
-        std::string uri = "mongodb://localhost:27017";
+        std::string uri = "mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse";
         std::string errmsg;
 
         ConnectionString cs = ConnectionString::parse(uri, errmsg);
@@ -83,19 +83,11 @@ int GraspGenerationPlugin::init(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
+//        dbName = cs.getDatabase();
+
+//        std::cout << dbName.c_str() << std::endl;
 
 
-
-
-//        std::string errmsg;
-//        ConnectionString cs = ConnectionString::parse("mongodb://localhost:27017", errmsg);
-////        mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse
-
-////        c.connect(cs.getServers().at(0));
-////        c.auth(cs.getDatabase(), cs.getUser(), cs.getPassword());
-////        c = cs.connect(errmsg);
-////        c = static_cast<mongo::DBClientConnection*>(cs.connect(errmsg));
-//        boost::scoped_ptr<DBClientBase> c(cs.connect(errmsg));
         std::cout << "connected ok to mongodb" << std::endl;
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -105,7 +97,7 @@ int GraspGenerationPlugin::init(int argc, char **argv)
     std::cout << "Parsing Args..." << std::endl;
     cmdline::parser *parser = new cmdline::parser();
 
-    parser->add<std::string>("mesh_filepath", 'c', "mesh_filepath",  false);
+    parser->add<std::string>("dbname", 'c', "dbname",  false);
     parser->add<bool>("render", 'l', "render", false);
 
     parser->parse(argc, argv);
@@ -120,11 +112,12 @@ int GraspGenerationPlugin::init(int argc, char **argv)
         render_it = false;
     }
 
-    mesh_filepath = QString::fromStdString(parser->get<std::string>("mesh_filepath"));
+    dbName = QString::fromStdString(parser->get<std::string>("dbname"));
+
 
     std::cout << "Args are: " << std::endl;
     std::cout << "render: " << render_it << "\n" ;
-    std::cout << "mesh_filepath: " << mesh_filepath.toStdString().c_str() << "\n" ;
+    std::cout << "dbName: " << dbName.toStdString().c_str() << "\n" ;
 
     std::cout << "Finished Init..." << std::endl;
 
@@ -195,7 +188,7 @@ void GraspGenerationPlugin::startPlanner()
 
     mPlanner->setEnergyType(ENERGY_CONTACT_QUALITY);
     mPlanner->setContactType(CONTACT_PRESET);
-    mPlanner->setMaxSteps(num_steps);
+    mPlanner->setMaxSteps(70000);
 
     mPlanner->resetPlanner();
 
@@ -205,7 +198,7 @@ void GraspGenerationPlugin::startPlanner()
 
 void GraspGenerationPlugin::stepPlanner()
 {
-    if ( mPlanner->getCurrentStep() >= num_steps)
+    if ( mPlanner->getCurrentStep() >= 70000)
     {
         mPlanner->stopPlanner();
         plannerFinished=true;
@@ -238,7 +231,7 @@ void GraspGenerationPlugin::uploadResults()
         //usleep(1000000);
 
         BSONObj p = toMongoGrasp(&gps, QString("ENERGY_CONTACT_QUALITY"));
-        c->insert("test.grasps_dev", p);
+        c->insert("goparse.grasps_dev", p);
 
     }
     // TODO: find a better way to die

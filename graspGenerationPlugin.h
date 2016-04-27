@@ -46,7 +46,6 @@ protected:
   void startPlanner();
   void uploadResults();
   void stepPlanner();
-
   mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
 
 private:
@@ -59,14 +58,14 @@ private:
   bool plannerStarted;
   bool plannerFinished;
   bool evaluatingGrasps;
-
-  QString mesh_filepath;
-
+  int myInteger;
+  QString dbName;
+//  std::string dbName;
+//  QString myQStr;
   bool render_it;
-
-  int num_steps;
   //mongo::DBClientConnection *c;
   mongo::DBClientBase *c;
+//  mongo::ConnectionString cs;
 
 };
 

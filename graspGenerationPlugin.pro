@@ -8,7 +8,7 @@ TEMPLATE = lib
 
 LANGUAGE	= C++
 CONFIG += qt dylib c++11
-QMAKE_CXXFLAGS += -g -std=c++11 
+QMAKE_CXXFLAGS += -g -std=c++11
 QT += qt3support
 DESTDIR = lib
 MOC_DIR = build
@@ -34,4 +34,4 @@ SOURCES += \
     graspGenerationPlugin.cpp
 
 # Mongo Driver shared lib
-LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongoclient -lboost_system
+LIBS += -L/home/timchunght/graspit_data_gen/mongo-cxx-driver/build/install/lib -lmongoclient
