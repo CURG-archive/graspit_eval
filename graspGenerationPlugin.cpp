@@ -42,8 +42,8 @@ GraspGenerationPlugin::GraspGenerationPlugin() :
     mPlanner(NULL),
     plannerStarted(false),
     plannerFinished(false),
-    evaluatingGrasps(false),
-    myInteger(10001)
+    evaluatingGrasps(false)
+
 {
 
 }
@@ -67,7 +67,14 @@ int GraspGenerationPlugin::init(int argc, char **argv)
     try {
 
 
-        std::string uri = "mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse";
+        std::string uri = QString(getenv("MONGO_URL")).toStdString();
+        if(uri == "") {
+
+            std::cerr << "MONGO_URL env not found" << std::endl;
+            return 1;
+        }
+
+//                "mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse";
         std::string errmsg;
 
         ConnectionString cs = ConnectionString::parse(uri, errmsg);
