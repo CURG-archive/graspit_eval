@@ -30,7 +30,24 @@ or
 ```
 ~/graspit/bin/graspit -p libgraspGenerationPlugin -c mug.iv
 ```
-Introduction
+
+### Qt Creator Configuration
+
+Build directory:
+
+```
+/home/timchunght/graspit_eval
+```
+Make arguments: ``-j5``
+
+Run Executable:
+```
+/abs_path_to_graspit/graspit/bin/graspit
+```
+
+Run Arg: ``-p libgraspEvalPlugin``
+
+### Introduction
 ------------
 This plugin serves as an introduction to writing plugins for the GraspIt! grasping simulator.
 It should be used as an example and to test your system configuration.

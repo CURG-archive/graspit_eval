@@ -1,4 +1,4 @@
-#include "graspGenerationPlugin.h"
+#include "graspEvalPlugin.h"
 
 #include "QJsonObject.h"
 #include <cmath>
@@ -10,12 +10,6 @@
 #include <include/graspitGUI.h>
 #include <include/ivmgr.h>
 
-#include <include/EGPlanner/egPlanner.h>
-#include <include/EGPlanner/simAnnPlanner.h>
-#include <include/EGPlanner/onLinePlanner.h>
-#include <include/EGPlanner/guidedPlanner.h>
-#include <include/EGPlanner/searchState.h>
-#include <include/EGPlanner/searchEnergy.h>
 
 #include <include/grasp.h>
 #include <include/triangle.h>
@@ -38,26 +32,19 @@ using mongo::BSONElement;
 using namespace mongo;
 
 
-GraspEvalPlugin::GraspEvalPlugin() :
-    mPlanner(NULL),
-    plannerStarted(false),
-    plannerFinished(false),
-    evaluatingGrasps(false)
-
-{
+GraspEvalPlugin::GraspEvalPlugin() {
 
 }
 
-GraspEvalPlugin::~GraspEvalPlugin()
-{
+GraspEvalPlugin::~GraspEvalPlugin() {
 }        
 
 
-int GraspEvalPlugin::init(int argc, char **argv)
-{
+int GraspEvalPlugin::init(int argc, char **argv) {
+
     std::cout << "Starting GraspEvalPlugin: " << std::endl ;
     std::cout << "Connecting to Mongo..." << std::endl ;
-    std::cout << "My Integer" << myInteger << std::endl;
+
 
     mongo::client::GlobalInstance instance;
     if (!instance.initialized()) {
@@ -67,7 +54,8 @@ int GraspEvalPlugin::init(int argc, char **argv)
     try {
 
 
-        std::string uri = QString(getenv("MONGO_URL")).toStdString();
+        std::string uri = "mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse"; 
+        //QString(getenv("MONGO_URL")).toStdString();
         if(uri == "") {
 
             std::cerr << "MONGO_URL env not found" << std::endl;
@@ -91,40 +79,19 @@ int GraspEvalPlugin::init(int argc, char **argv)
         }
 
         dbName = QString::fromStdString(cs.getDatabase());
-
         std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
-
-
         std::cout << "connected ok to mongodb" << std::endl;
+
+
+        BSONObjBuilder g;
+        g.append("sample", "graspit");
+
+        BSONObj p =g.obj();
+        c->insert("goparse.helloworld", p);
+
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
     }
-
-
-    std::cout << "Parsing Args..." << std::endl;
-    cmdline::parser *parser = new cmdline::parser();
-
-    parser->add<std::string>("dbname", 'c', "dbname",  false);
-    parser->add<bool>("render", 'l', "render", false);
-
-    parser->parse(argc, argv);
-
-    if (parser->exist("render"))
-    {
-        render_it = parser->get<bool>("render");
-
-    }
-    else
-    {
-        render_it = false;
-    }
-
-//    dbName = QString::fromStdString(parser->get<std::string>("dbname"));
-
-
-    std::cout << "Args are: " << std::endl;
-    std::cout << "render: " << render_it << "\n" ;
-//    std::cout << "dbName: " << dbName.toStdString().c_str() << "\n" ;
 
     std::cout << "Finished Init..." << std::endl;
 
@@ -137,23 +104,9 @@ int GraspEvalPlugin::init(int argc, char **argv)
 // 3) Last step, save the grasps
 int GraspEvalPlugin::mainLoop()
 {
-    //start planner
-    if (!plannerStarted)
-    {
-        startPlanner();
-    }
-    //let planner run.
-    else if( (plannerStarted) && !plannerFinished )
-    {
-        stepPlanner();
-    }
-    //save grasps
-    else if(plannerStarted && plannerFinished && (!evaluatingGrasps))
-    {
-        uploadResults();
-    }
-
-  return 0;
+   
+    std::cout << "Inside the mainLoop()" << std::endl;
+    return 0;
 }
 
 

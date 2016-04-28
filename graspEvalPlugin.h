@@ -13,7 +13,7 @@
 //Qt headers
 #include <QJsonObject.h>
 
-class EGPlanner;
+
 class GraspPlanningState;
 class GraspableBody;
 class Hand;
@@ -47,13 +47,12 @@ protected:
   // mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
 
 private:
-  EGPlanner *mPlanner;
+
   GraspPlanningState *mHandObjectState;
   GraspableBody *mObject;
   Hand *mHand;
   QJsonObject modelJson;
   QString dbName;
-  bool render_it;
   mongo::DBClientBase *c;
 
 };

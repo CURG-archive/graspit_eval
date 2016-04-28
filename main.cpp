@@ -3,7 +3,7 @@
 #include <string>
 
 extern "C" PLUGIN_API Plugin* createPlugin() {
-  return new GraspGenerationPlugin();
+  return new GraspEvalPlugin();
 }
 
 
