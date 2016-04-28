@@ -1,5 +1,5 @@
-#ifndef GRASPGENERATOR_H
-#define GRASPGENERATOR_H
+#ifndef GRASPEVAL_H
+#define GRASPEVAL_H
 
 #include <map>
 #include <QObject>
@@ -27,47 +27,36 @@ class Hand;
   obstacles, simulating 3D scans of objects, etc.
   In particular, note that this class uses the mainLoop() function to perform the ROS event management calls.
 */
-class GraspGenerationPlugin : public QObject, public Plugin
+class GraspEvalPlugin : public QObject, public Plugin
 {
 
     Q_OBJECT
 
 public:
   //! Inits ROS, but (for now) without passing any arguments
-  GraspGenerationPlugin();
+  GraspEvalPlugin();
   //! Deletes the node handle and the db manager
-  ~GraspGenerationPlugin();
+  ~GraspEvalPlugin();
   //! Creates the node handles, advertises services, connects to the database
   virtual int init(int argc, char **argv);
   //! Simply calls ros::spinOnce() to process the ROS event loop
   virtual int mainLoop();
 
 protected:
-  void startPlanner();
-  void uploadResults();
-  void stepPlanner();
-  mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
+
+  // mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
 
 private:
-
   EGPlanner *mPlanner;
   GraspPlanningState *mHandObjectState;
   GraspableBody *mObject;
   Hand *mHand;
   QJsonObject modelJson;
-  bool plannerStarted;
-  bool plannerFinished;
-  bool evaluatingGrasps;
-  int myInteger;
   QString dbName;
-//  std::string dbName;
-//  QString myQStr;
   bool render_it;
-  //mongo::DBClientConnection *c;
   mongo::DBClientBase *c;
-//  mongo::ConnectionString cs;
 
 };
 
 
-#endif // GRASPGENERATOR_H
+#endif // GRASPEVAL_H

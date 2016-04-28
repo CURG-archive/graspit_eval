@@ -1,4 +1,4 @@
-## GraspIt! HelloWorld Plugin
+## GraspIt! Eval
 ---
 
 In the plugin directory or run ``source set_env.sh``
