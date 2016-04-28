@@ -83,9 +83,9 @@ int GraspGenerationPlugin::init(int argc, char **argv)
             return EXIT_FAILURE;
         }
 
-//        dbName = cs.getDatabase();
+        dbName = QString::fromStdString(cs.getDatabase());
 
-//        std::cout << dbName.c_str() << std::endl;
+        std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
 
 
         std::cout << "connected ok to mongodb" << std::endl;
@@ -112,12 +112,12 @@ int GraspGenerationPlugin::init(int argc, char **argv)
         render_it = false;
     }
 
-    dbName = QString::fromStdString(parser->get<std::string>("dbname"));
+//    dbName = QString::fromStdString(parser->get<std::string>("dbname"));
 
 
     std::cout << "Args are: " << std::endl;
     std::cout << "render: " << render_it << "\n" ;
-    std::cout << "dbName: " << dbName.toStdString().c_str() << "\n" ;
+//    std::cout << "dbName: " << dbName.toStdString().c_str() << "\n" ;
 
     std::cout << "Finished Init..." << std::endl;
 
@@ -214,6 +214,8 @@ void GraspGenerationPlugin::uploadResults()
 
     int num_grasps = mPlanner->getListSize();
     std::cout << "Found " << num_grasps << " Grasps. " << std::endl;
+    std::string mongoCollName = (dbName + QString(".grasps")).toStdString();
+    std::cout <<"Uploading to Mongo Coll: " << mongoCollName << std::endl;
 
     for(int i=0; i < num_grasps; i++)
     {
@@ -231,7 +233,8 @@ void GraspGenerationPlugin::uploadResults()
         //usleep(1000000);
 
         BSONObj p = toMongoGrasp(&gps, QString("ENERGY_CONTACT_QUALITY"));
-        c->insert("goparse.grasps_dev", p);
+
+        c->insert(mongoCollName, p);
 
     }
     // TODO: find a better way to die
