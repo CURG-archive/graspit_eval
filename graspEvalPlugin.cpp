@@ -24,7 +24,7 @@
 
 #include "mongo/client/dbclient.h" // for the driver
 
-
+#include <include/EGPlanner/searchState.h>
 
 using mongo::BSONArray;
 using mongo::BSONArrayBuilder;
@@ -309,8 +309,21 @@ void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
         double dof = graspBsonObj.getField("dof").Array().front().Double();
         std::cout<< "dof: " <<  dof << std::endl;
 
+        //get this from mongo, need to find-replace all mongo robot names to pr2_gripper_2010
+        QString robotname = QString("pr2_gripper_2010");
+        QString robot_filepath= QString(genenv("GRASPIT")) + QString("/models/robots/") + robotname + QString("/") +  robotname + ".xml";
+        graspItGUI->getMainWorld()->importRobot(robot_filepath);
+        mHand = graspItGUI->getMainWorld()->getCurrentHand();
 
 
+        // TODO; use the load from url option in dbModelLoader
+        //get this from mongo,
+        QString bodyfilename = QString("mug.off");
+        // Use dbModelLoader to load the body from off
+        Body* b = graspItGUI->getMainWorld()->importBody("GraspableBody", bodyfilename);
+
+        GraspPlanningState *gps = new GraspPlanningState(mHand);
+        gps->setObject(b);
 
 //       std::cout << graspBsonObj.toString() << std::endl;
     }
