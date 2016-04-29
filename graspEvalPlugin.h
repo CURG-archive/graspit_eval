@@ -42,6 +42,8 @@ public:
   //! Simply calls ros::spinOnce() to process the ROS event loop
   virtual int mainLoop();
 
+  bool liftHand(double moveDist, bool oneStep);
+
 protected:
 
   // mongo::BSONObj toMongoGrasp(GraspPlanningState *gps, QString energyType);
@@ -54,6 +56,11 @@ private:
   QJsonObject modelJson;
   QString dbName;
   mongo::DBClientBase *c;
+
+  bool hasAutoGrasped;
+  bool hasApproachedTilContact;
+  bool hasLifted;
+  int step_count;
 
 };
 

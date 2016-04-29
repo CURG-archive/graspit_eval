@@ -9,10 +9,12 @@
 #include <include/robot.h>
 #include <include/graspitGUI.h>
 #include <include/ivmgr.h>
+#include <ui/mainWindow.h>
 
 
 #include <include/grasp.h>
 #include <include/triangle.h>
+#include <include/debug.h>
 
 #include <cmdline/cmdline.h>
 #include "include/dbModelLoader.h"
@@ -32,7 +34,13 @@ using mongo::BSONElement;
 using namespace mongo;
 
 
-GraspEvalPlugin::GraspEvalPlugin() {
+GraspEvalPlugin::GraspEvalPlugin():
+    hasAutoGrasped(false),
+    hasApproachedTilContact(false),
+    hasLifted(false),
+    step_count(0),
+    mHand(NULL)
+{
 
 }
 
@@ -84,7 +92,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
 
 
         BSONObjBuilder g;
-        g.append("sample", "graspit");
+        g.append("sample", "graspit, yay Jake!");
 
         BSONObj p =g.obj();
         c->insert("goparse.helloworld", p);
@@ -95,6 +103,8 @@ int GraspEvalPlugin::init(int argc, char **argv) {
 
     std::cout << "Finished Init..." << std::endl;
 
+
+
     return 0;
 }
 
@@ -104,9 +114,94 @@ int GraspEvalPlugin::init(int argc, char **argv) {
 // 3) Last step, save the grasps
 int GraspEvalPlugin::mainLoop()
 {
-   
-    std::cout << "Inside the mainLoop()" << std::endl;
+    step_count++;
+
+    if(mHand == NULL)
+    {
+        mHand = graspItGUI->getMainWorld()->getCurrentHand();
+    }
+
+    if(!graspItGUI->getMainWorld()->dynamicsAreOn())
+    {
+         graspItGUI->getMainWorld()->turnOnDynamics();
+    }
+
+//    if(!hasApproachedTilContact)
+//    {
+//        graspItGUI->getMainWorld()->getCurrentHand()->approachToContact(100, false);
+//        hasApproachedTilContact = true;
+//        std::cout << " hasApproachedTilContact step_count: " << step_count << std::endl;
+//    }
+
+//    if(hasApproachedTilContact && !hasAutoGrasped && step_count > 100)
+//    {
+//        graspItGUI->getMainWorld()->getCurrentHand()->autoGrasp(true);
+//        graspItGUI->getMainWorld()->updateGrasps();
+//        hasAutoGrasped=true;
+//        std::cout << " hasAutoGrasped step_count: " << step_count << std::endl;
+//    }
+
+//    if(hasAutoGrasped && !hasLifted&& step_count > 500)
+//    {
+        std::cout << "trying to lift" << std::endl;
+        liftHand(1000,false);
+        //hasLifted=true;
+         std::cout << "hasLifted step_count: " << step_count << std::endl;
+//    }
+
     return 0;
+}
+
+bool GraspEvalPlugin::liftHand(double moveDist, bool oneStep)
+{
+//    double newvelocity[6];
+//    const double* velocity = mHand->getPalm()->getVelocity();
+//    transf newTran =  translate_transf(vec3(0,0,step_count*.1) * mHand->getTran());
+//    mHand->setTran(newTran);
+    std::vector<Body*> bodies;
+    mHand->getBodyList(&bodies);
+    for(int i = 0; i < bodies.size(); i++)
+    {
+        double newvelocity[6];
+        Body *b = bodies.at(i);
+        DynamicBody *db = dynamic_cast<DynamicBody*> (b);
+        const double* velocity = db->getVelocity();
+
+            newvelocity[0] = velocity[0];
+            newvelocity[1] = velocity[1];
+            newvelocity[2] = velocity[2];
+            newvelocity[3] = velocity[3];
+            newvelocity[4] = velocity[4];
+            newvelocity[5] = velocity[5];
+            newvelocity[2] += step_count;
+            db->setVelocity(newvelocity);
+            std::cout << "Here I am" << std::endl;
+    }
+    //graspItGUI->getMainWorld()->moveDynamicBodies(1/60.0);
+    graspItGUI->getIVmgr()->getViewer()->render();
+//    newvelocity[0] = velocity[0];
+//    newvelocity[1] = velocity[1];
+//    newvelocity[2] = velocity[2];
+//    newvelocity[3] = velocity[3];
+//    newvelocity[4] = velocity[4];
+//    newvelocity[5] = velocity[5];
+//    newvelocity[0] += 100;
+//    mHand->getPalm()->setVelocity(newvelocity);
+//    transf newTran = translate_transf(vec3(0,moveDist,0) * mHand->getApproachTran()) * translate_transf(vec3(0,moveDist,0) * mHand->getTran());
+//    bool result;
+//    std::cout << "about to lift hand" << std::endl;
+//    if (oneStep) {
+//        result = mHand->moveToIgnoreCollision(newTran, WorldElement::ONE_STEP, WorldElement::ONE_STEP);
+//    } else {
+//        result = mHand->moveToIgnoreCollision(newTran, .1*Contact::THRESHOLD, M_PI/36.0);
+//    }
+//    if (result) {
+//        DBGP("Approach no contact");
+//        return false;
+//    } else {
+//        DBGP("Approach results in contact");
+//        return true;
+//    }
 }
 
 
