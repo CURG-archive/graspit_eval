@@ -31,6 +31,7 @@ using mongo::BSONArrayBuilder;
 using mongo::BSONObj;
 using mongo::BSONObjBuilder;
 using mongo::BSONElement;
+
 using namespace mongo;
 
 
@@ -90,12 +91,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
         std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
         std::cout << "connected ok to mongodb" << std::endl;
 
-
-        BSONObjBuilder g;
-        g.append("sample", "graspit, yay Jake!");
-
-        BSONObj p =g.obj();
-        c->insert("goparse.helloworld", p);
+        getGrasps(c);
 
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -292,3 +288,31 @@ bool GraspEvalPlugin::liftHand(double moveDist, bool oneStep)
 //     return grasp.obj();
 // }
 
+
+void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
+
+
+    std::string collName = "grasps";
+
+    std::string mongoCollName = (dbName + "." + QString::fromStdString(collName)).toStdString();
+
+
+    std::auto_ptr<DBClientCursor> cursor = c->query(mongoCollName, BSONObj());
+    BSONObj graspBsonObj;
+    while (cursor->more()) {
+        graspBsonObj = cursor->next();
+
+        std::cout<< "Hand: " << graspBsonObj.getField("hand").valueStringData().toString() << std::endl;
+
+        std::cout<< "modelName: " << graspBsonObj.getField("model").Obj().getField("name").valueStringData().toString() << std::endl;
+
+        double dof = graspBsonObj.getField("dof").Array().front().Double();
+        std::cout<< "dof: " <<  dof << std::endl;
+
+
+
+
+//       std::cout << graspBsonObj.toString() << std::endl;
+    }
+
+}
