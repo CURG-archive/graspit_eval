@@ -91,7 +91,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
         std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
         std::cout << "connected ok to mongodb" << std::endl;
 
-        getGrasps(c);
+        //getGrasps(c);
 
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -154,25 +154,30 @@ bool GraspEvalPlugin::liftHand(double moveDist, bool oneStep)
 //    const double* velocity = mHand->getPalm()->getVelocity();
 //    transf newTran =  translate_transf(vec3(0,0,step_count*.1) * mHand->getTran());
 //    mHand->setTran(newTran);
-    std::vector<Body*> bodies;
-    mHand->getBodyList(&bodies);
-    for(int i = 0; i < bodies.size(); i++)
-    {
-        double newvelocity[6];
-        Body *b = bodies.at(i);
-        DynamicBody *db = dynamic_cast<DynamicBody*> (b);
-        const double* velocity = db->getVelocity();
+//    std::vector<Body*> bodies;
+//    mHand->getBodyList(&bodies);
+//    for(int i = 0; i < bodies.size(); i++)
+//    {
+//        double newvelocity[6];
+//        Body *b = bodies.at(i);
+//        DynamicBody *db = dynamic_cast<DynamicBody*> (b);
+////        const double* velocity = db->getVelocity();
 
-            newvelocity[0] = velocity[0];
-            newvelocity[1] = velocity[1];
-            newvelocity[2] = velocity[2];
-            newvelocity[3] = velocity[3];
-            newvelocity[4] = velocity[4];
-            newvelocity[5] = velocity[5];
-            newvelocity[2] += step_count;
-            db->setVelocity(newvelocity);
-            std::cout << "Here I am" << std::endl;
-    }
+////            newvelocity[0] = velocity[0];
+////            newvelocity[1] = velocity[1];
+////            newvelocity[2] = velocity[2];
+////            newvelocity[3] = velocity[3];
+////            newvelocity[4] = velocity[4];
+////            newvelocity[5] = velocity[5];
+////            newvelocity[2] += step_count;
+////            db->setVelocity(newvelocity);
+//            std::cout << "Here I am" << db->isDynamic() <<  std::endl;
+//            db->addForce(vec3(0,0,1000));
+//    }
+    Link *p = mHand->getPalm();
+     DynamicBody *db = dynamic_cast<DynamicBody*> (p);
+     db->addForceAtPos(vec3(0,0,1000000000), position(0,0,0));
+     db->setUseDynamics(true);
     //graspItGUI->getMainWorld()->moveDynamicBodies(1/60.0);
     graspItGUI->getIVmgr()->getViewer()->render();
 //    newvelocity[0] = velocity[0];
@@ -310,9 +315,9 @@ void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
         std::cout<< "dof: " <<  dof << std::endl;
 
         //get this from mongo, need to find-replace all mongo robot names to pr2_gripper_2010
-        QString robotname = QString("pr2_gripper_2010");
-        QString robot_filepath= QString(genenv("GRASPIT")) + QString("/models/robots/") + robotname + QString("/") +  robotname + ".xml";
-        graspItGUI->getMainWorld()->importRobot(robot_filepath);
+//        QString robotname = QString("pr2_gripper_2010");
+//        QString robot_filepath= QString(genenv("GRASPIT")) + QString("/models/robots/") + robotname + QString("/") +  robotname + ".xml";
+//        graspItGUI->getMainWorld()->importRobot(robot_filepath);
         mHand = graspItGUI->getMainWorld()->getCurrentHand();
 
 
@@ -322,8 +327,8 @@ void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
         // Use dbModelLoader to load the body from off
         Body* b = graspItGUI->getMainWorld()->importBody("GraspableBody", bodyfilename);
 
-        GraspPlanningState *gps = new GraspPlanningState(mHand);
-        gps->setObject(b);
+//        GraspPlanningState *gps = new GraspPlanningState(mHand);
+//        gps->setObject(b);
 
 //       std::cout << graspBsonObj.toString() << std::endl;
     }
