@@ -40,7 +40,8 @@ GraspEvalPlugin::GraspEvalPlugin():
     hasApproachedTilContact(false),
     hasLifted(false),
     step_count(0),
-    mHand(NULL)
+    mHand(NULL),
+    worldLoaded(false)
 {
 
 }
@@ -91,7 +92,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
         std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
         std::cout << "connected ok to mongodb" << std::endl;
 
-        getGrasps(c);
+
 
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -110,6 +111,11 @@ int GraspEvalPlugin::init(int argc, char **argv) {
 // 3) Last step, save the grasps
 int GraspEvalPlugin::mainLoop()
 {
+
+    if(!worldLoaded) {
+
+       getGrasps(c);
+    }
     step_count++;
 
     if(mHand == NULL)
@@ -120,6 +126,7 @@ int GraspEvalPlugin::mainLoop()
     if(!graspItGUI->getMainWorld()->dynamicsAreOn())
     {
          graspItGUI->getMainWorld()->turnOnDynamics();
+
     }
 
 //    if(!hasApproachedTilContact)
@@ -140,7 +147,7 @@ int GraspEvalPlugin::mainLoop()
 //    if(hasAutoGrasped && !hasLifted&& step_count > 500)
 //    {
         std::cout << "trying to lift" << std::endl;
-        liftHand(1000,false);
+//        liftHand(1000,false);
         //hasLifted=true;
          std::cout << "hasLifted step_count: " << step_count << std::endl;
 //    }
@@ -334,7 +341,7 @@ void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
 
         DbModelLoader loader;
         graspItGUI->getMainWorld()->importRobot(robotPath.toStdString().c_str());
-
+        std::cout << "LOADING ROBOT PASSED" << std::endl;
         loader.loadModelFromUrl(modelUrl, modelName, QString("rubber"), 150.0);
         break;
 

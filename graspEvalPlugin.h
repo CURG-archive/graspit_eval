@@ -61,6 +61,7 @@ private:
   bool hasApproachedTilContact;
   bool hasLifted;
   int step_count;
+  bool worldLoaded;
   void getGrasps(mongo::DBClientBase *c);
 };
 
