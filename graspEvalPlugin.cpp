@@ -63,7 +63,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
     try {
 
 
-        std::string uri = "mongodb://tim:ilovetim@ds023418.mlab.com:23418/goparse"; 
+        std::string uri = "mongodb://localhost:27017/test";
         //QString(getenv("MONGO_URL")).toStdString();
         if(uri == "") {
 
@@ -91,7 +91,7 @@ int GraspEvalPlugin::init(int argc, char **argv) {
         std::cout << "Connected to database: "<< dbName.toStdString().c_str() << std::endl;
         std::cout << "connected ok to mongodb" << std::endl;
 
-        //getGrasps(c);
+        getGrasps(c);
 
     } catch( const mongo::DBException &e ) {
         std::cout << "caught " << e.what() << std::endl;
@@ -307,25 +307,45 @@ void GraspEvalPlugin::getGrasps(mongo::DBClientBase *c) {
     while (cursor->more()) {
         graspBsonObj = cursor->next();
 
-        std::cout<< "Hand: " << graspBsonObj.getField("hand").valueStringData().toString() << std::endl;
+        QString modelUrl = QString::fromStdString(graspBsonObj.getField("model").Obj().getField("url").valueStringData().toString());
 
-        std::cout<< "modelName: " << graspBsonObj.getField("model").Obj().getField("name").valueStringData().toString() << std::endl;
+        QString modelName = QString::fromStdString(graspBsonObj.getField("model").Obj().getField("name").valueStringData().toString());
+
+        QString handName = QString::fromStdString(graspBsonObj.getField("hand").valueStringData().toString());
+
+        std::cout<< "Hand: " << handName.toStdString().c_str() << std::endl;
+
+        std::cout<< "modelName: " << modelName.toStdString().c_str() << std::endl;
+
+        std::cout<< "modelUrl: " << modelUrl.toStdString().c_str() << std::endl;
 
         double dof = graspBsonObj.getField("dof").Array().front().Double();
         std::cout<< "dof: " <<  dof << std::endl;
 
         //get this from mongo, need to find-replace all mongo robot names to pr2_gripper_2010
 //        QString robotname = QString("pr2_gripper_2010");
-//        QString robot_filepath= QString(genenv("GRASPIT")) + QString("/models/robots/") + robotname + QString("/") +  robotname + ".xml";
-//        graspItGUI->getMainWorld()->importRobot(robot_filepath);
-        mHand = graspItGUI->getMainWorld()->getCurrentHand();
+        QString robotPath= QString(getenv("GRASPIT")) + QString("/models/robots/") + handName + QString("/") +  handName + ".xml";
+
+
+//         std::cout<< "robot path: " << robotFilepath.toStdString().c_str() << std::endl;
+//        mHand = static_cast<Hand* >(graspItGUI->getMainWorld()->importRobot(robotFilepath));
+
+        std::cout<< "robot path: " << robotPath.toStdString().c_str() << std::endl;
+
+        DbModelLoader loader;
+        graspItGUI->getMainWorld()->importRobot(robotPath.toStdString().c_str());
+
+        loader.loadModelFromUrl(modelUrl, modelName, QString("rubber"), 150.0);
+        break;
+
+//        mHand = graspItGUI->getMainWorld()->getCurrentHand();
 
 
         // TODO; use the load from url option in dbModelLoader
         //get this from mongo,
-        QString bodyfilename = QString("mug.off");
+//        QString bodyfilename = QString("mug.off");
         // Use dbModelLoader to load the body from off
-        Body* b = graspItGUI->getMainWorld()->importBody("GraspableBody", bodyfilename);
+//        Body* b = graspItGUI->getMainWorld()->importBody("GraspableBody", bodyfilename);
 
 //        GraspPlanningState *gps = new GraspPlanningState(mHand);
 //        gps->setObject(b);
